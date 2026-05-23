@@ -6,8 +6,8 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Simple but explicit CORS configuration
-app.use(cors({
+// CORS configuration
+const corsOptions = {
   origin: [
     'https://team-task-manager-taupe-ten.vercel.app',
     'https://team-task-manager-git-main-anas9169s-projects.vercel.app',
@@ -15,8 +15,15 @@ app.use(cors({
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS to all routes
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
