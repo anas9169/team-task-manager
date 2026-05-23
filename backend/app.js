@@ -6,7 +6,14 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+      'https://team-task-manager-taupe-ten.vercel.app',
+      'https://team-task-manager-git-main-anas9169s-projects.vercel.app',
+      'https://team-task-manager-2vli0r5b3-anas9169s-projects.vercel.app'
+    ],
+    credentials: true
+  }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
