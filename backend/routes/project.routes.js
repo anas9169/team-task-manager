@@ -16,7 +16,7 @@ router.use(protect);
 router.post('/', authorize('admin'), createProject);
 router.get('/', getAllProjects);
 router.get('/:id', getProjectById);
-router.put('/:id', updateProject);
+router.put('/:id', authorize('admin'), updateProject);
 router.delete('/:id', authorize('admin'), deleteProject);
 
 module.exports = router;

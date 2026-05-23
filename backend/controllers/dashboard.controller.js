@@ -60,6 +60,11 @@ const getDashboardStats = async (req, res, next) => {
       status: { $ne: 'completed' },
     };
 
+    const taskPopulate = [
+      { path: 'project', select: PROJECT_FIELDS },
+      { path: 'assignedTo', select: USER_FIELDS },
+    ];
+
     const [
       totalProjects,
       totalTasks,
@@ -68,6 +73,7 @@ const getDashboardStats = async (req, res, next) => {
       overdueTasks,
       statusCounts,
       recentTasks,
+      overdueTasksList,
     ] = await Promise.all([
       Project.countDocuments(),
       Task.countDocuments(),
@@ -75,12 +81,10 @@ const getDashboardStats = async (req, res, next) => {
       Task.countDocuments({ status: { $ne: 'completed' } }),
       Task.countDocuments(overdueFilter),
       Task.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Task.find()
-        .populate([
-          { path: 'project', select: PROJECT_FIELDS },
-          { path: 'assignedTo', select: USER_FIELDS },
-        ])
-        .sort({ createdAt: -1 })
+      Task.find().populate(taskPopulate).sort({ createdAt: -1 }).limit(RECENT_TASK_LIMIT),
+      Task.find(overdueFilter)
+        .populate(taskPopulate)
+        .sort({ dueDate: 1 })
         .limit(RECENT_TASK_LIMIT),
     ]);
 
@@ -94,6 +98,7 @@ const getDashboardStats = async (req, res, next) => {
         overdueTasks,
         tasksByStatus: buildTasksByStatus(statusCounts),
         recentTasks: recentTasks.map(formatRecentTask),
+        overdueTasksList: overdueTasksList.map(formatRecentTask),
       },
     });
   } catch (error) {
